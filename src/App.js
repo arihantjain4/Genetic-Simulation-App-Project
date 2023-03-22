@@ -7,14 +7,26 @@ function precisionRound(number, precision) {
     return Math.round(number * factor) / factor;
 }
 
-function generateOffspring(p, q, populationSize) {
+function generateOffspring(p, q, populationSize, replacement) {
     let offspringPopulation = { AA: 0, Aa: 0, aa: 0 };
+    let allelePool = [];
+
+    for (let i = 0; i < populationSize * 2; i++) {
+        allelePool.push(i < 2 * p * populationSize ? "A" : "a");
+    }
+
+    function getRandomAllele() {
+        let index = Math.floor(Math.random() * allelePool.length);
+        let allele = allelePool[index];
+        if (!replacement) {
+            allelePool.splice(index, 1);
+        }
+        return allele;
+    }
 
     for (let i = 0; i < populationSize; i++) {
-        let parent1 = Math.random();
-        let parent2 = Math.random();
-        let allele1 = parent1 < p ? "A" : "a";
-        let allele2 = parent2 < p ? "A" : "a";
+        let allele1 = getRandomAllele();
+        let allele2 = getRandomAllele();
         let offspring = allele1 + allele2;
 
         if (offspring === "Aa" || offspring === "aA") {
@@ -37,6 +49,7 @@ function App() {
     const [qValue, setQValue] = useState(null);
     const [initialPopulationSize, setInitialPopulationSize] = useState(null);
     const [generationCount, setGenerationCount] = useState(null);
+    const [replacement, setReplacement] = useState(true);
     const [generationData, setGenerationData] = useState([]);
 
     function handleSubmit(event) {
@@ -45,12 +58,13 @@ function App() {
         const qValue = Number(document.getElementById('qValue').value);
         const initialPopulationSize = Number(document.getElementById('initialPopulationSize').value);
         const generationCount = Number(document.getElementById('generationCount').value);
+        const replacement = document.getElementById('replacement').checked;
         let currentP = pValue;
         let currentQ = qValue;
         let generations = [];
 
         for (let i = 0; i < generationCount; i++) {
-            const { newP, newQ, offspringPopulation } = generateOffspring(currentP, currentQ, initialPopulationSize);
+            const { newP, newQ, offspringPopulation } = generateOffspring(currentP, currentQ, initialPopulationSize, replacement);
             generations.push(offspringPopulation);
             currentP = newP;
             currentQ = newQ;
@@ -60,6 +74,7 @@ function App() {
         setQValue(qValue);
         setInitialPopulationSize(initialPopulationSize);
         setGenerationCount(generationCount);
+        setReplacement(replacement);
         setGenerationData(generations);
     }
 
@@ -74,9 +89,14 @@ function App() {
                 <input type="number" id="initialPopulationSize" step="any" />
                 <p>Enter number of generations:</p>
                 <input type="number" id="generationCount" step="1" />
+                <p>
+                    <label>
+                        <input type="checkbox" id="replacement" defaultChecked />
+                        Sample with replacement
+                    </label>
+                </p>
                 <input type="submit" value="Submit" />
             </form>
-
             {generationData.map((generation, index) => (
                 <div key={index}>
                     <h3>Generation {index + 1}</h3>
@@ -96,3 +116,5 @@ function App() {
 }
 
 export default App;
+
+
