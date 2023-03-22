@@ -2,6 +2,11 @@ import { useState } from 'react';
 import './App.css';
 import { MathComponent } from "mathjax-react";
 
+function precisionRound(number, precision) {
+    let factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
+}
+
 function App() {
     const [pValue, setPValue] = useState(null);
     const [qValue, setQValue] = useState(null);
@@ -38,9 +43,27 @@ function App() {
         <div className="App">
             <form onSubmit={handleSubmit}>
                 <p>Enter p:</p>
-                <input type="number" id="pValue" step="any"/>
+                <input type="number" id="pValue" step="any" onChange={
+                    (event) => {
+                        if (event.target.value > 1 || event.target.value < 0) {
+                            console.log("invalid");
+                        }
+                        else {
+                            document.getElementById('qValue').value = precisionRound(1 - event.target.value, 3);
+                        }
+                    }
+                }/>
                 <p>Enter q:</p>
-                <input type="number" id="qValue" step="any"/>
+                <input type="number" id="qValue" step="any" onChange={
+                    (event) => {
+                        if (event.target.value > 1 || event.target.value < 0) {
+                            console.log("invalid");
+                        }
+                        else {
+                            document.getElementById('pValue').value = 1 - event.target.value;
+                        }
+                    }
+                }/>
                 <p>Enter initial population size:</p>
                 <input type="number" id="initialPopulationSize" step="any"/>
                 <input type="submit" value="Submit" />
@@ -50,15 +73,15 @@ function App() {
             
             <p id="homozygousDominant">
                 Gen 1 population that is <strong>homozygous dominant</strong>:
-                {pValue && initialPopulationSize ? <MathComponent tex={`${pValue}^2\\times${initialPopulationSize}=${(pValue*pValue).toFixed(3)}\\times${initialPopulationSize}=${(pValue*pValue*initialPopulationSize).toFixed(3)}`}/> : ""}
+                {pValue && initialPopulationSize ? <MathComponent tex={`${pValue}^2\\times${initialPopulationSize}=${(pValue*pValue).toFixed(3)}\\times${initialPopulationSize}\\approx${Math.round(pValue*pValue*initialPopulationSize)}`}/> : ""}
             </p>
             <p id="heterozygous">
                 Gen 1 population that is <strong>heterozygous</strong>:
-                {pValue && qValue && initialPopulationSize ? <MathComponent tex={`2\\times${pValue}\\times${qValue}\\times${initialPopulationSize}=${(2*pValue*qValue).toFixed(3)}\\times${initialPopulationSize}=${(2*pValue*qValue*initialPopulationSize).toFixed(3)}`}/> : ""}
+                {pValue && qValue && initialPopulationSize ? <MathComponent tex={`2\\times${pValue}\\times${qValue}\\times${initialPopulationSize}=${(2*pValue*qValue).toFixed(3)}\\times${initialPopulationSize}\\approx${Math.round(2*pValue*qValue*initialPopulationSize)}`}/> : ""}
             </p>
             <p id="homozygousRecessive">
                 Gen 1 population that is <strong>homozygous recessive</strong>:
-                {qValue && initialPopulationSize ? <MathComponent tex={`${qValue}^2\\times${initialPopulationSize}=${(qValue*qValue).toFixed(3)}\\times${initialPopulationSize}=${(qValue*qValue*initialPopulationSize).toFixed(3)}`}/> : ""}
+                {qValue && initialPopulationSize ? <MathComponent tex={`${qValue}^2\\times${initialPopulationSize}=${(qValue*qValue).toFixed(3)}\\times${initialPopulationSize}\\approx${Math.round(qValue*qValue*initialPopulationSize)}`}/> : ""}
             </p>
         </div>
     );

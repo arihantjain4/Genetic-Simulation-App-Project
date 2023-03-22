@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap');
+
 body {
   background-color: lightgray;
 }
 .App {
   text-align: center;
+  font-family: Inter;
 }
 
