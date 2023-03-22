@@ -44,6 +44,19 @@ function generateOffspring(p, q, populationSize, replacement) {
     return { newP, newQ, offspringPopulation };
 }
 
+function applyNaturalSelection(offspringPopulation, killRates) {
+    const { AA: AA_kill, Aa: Aa_kill, aa: aa_kill } = killRates;
+    offspringPopulation.AA = Math.floor(offspringPopulation.AA * (1 - AA_kill));
+    offspringPopulation.Aa = Math.floor(offspringPopulation.Aa * (1 - Aa_kill));
+    offspringPopulation.aa = Math.floor(offspringPopulation.aa * (1 - aa_kill));
+
+    const newPopulationSize = offspringPopulation.AA + offspringPopulation.Aa + offspringPopulation.aa;
+    const newP = (2 * offspringPopulation.AA + offspringPopulation.Aa) / (2 * newPopulationSize);
+    const newQ = 1 - newP;
+
+    return { newP, newQ, offspringPopulation };
+}
+
 function App() {
     const [pValue, setPValue] = useState(null);
     const [qValue, setQValue] = useState(null);
@@ -51,6 +64,8 @@ function App() {
     const [generationCount, setGenerationCount] = useState(null);
     const [replacement, setReplacement] = useState(true);
     const [generationData, setGenerationData] = useState([]);
+    const [killRates, setKillRates] = useState({ AA: 0, Aa: 0, aa: 0 });
+    const [generationIndex, setGenerationIndex] = useState(0);
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -77,14 +92,61 @@ function App() {
         setReplacement(replacement);
         setGenerationData(generations);
     }
+    function handleNaturalSelectionSubmit(event) {
+        event.preventDefault();
+        const AA_kill = Number(document.getElementById('AA_kill').value) / 100;
+        const Aa_kill = Number(document.getElementById('Aa_kill').value) / 100;
+        const aa_kill = Number(document.getElementById('aa_kill').value) / 100;
+
+        const killRates = {AA: AA_kill, Aa: Aa_kill, aa: aa_kill};
+        setKillRates(killRates);
+
+        const currentGeneration = generationData[generationIndex];
+        const {newP, newQ, offspringPopulation} = applyNaturalSelection(currentGeneration, killRates);
+
+        if (generationIndex + 1 < generationCount) {
+            const {
+                newP: nextP,
+                newQ: nextQ,
+                offspringPopulation: nextOffspringPopulation
+            } = generateOffspring(newP, newQ, initialPopulationSize, replacement);
+            setGenerationData([
+                ...generationData.slice(0, generationIndex + 1),
+                nextOffspringPopulation,
+                ...generationData.slice(generationIndex + 2),
+            ]);
+        }
+
+        setPValue(newP);
+        setQValue(newQ);
+        setGenerationIndex(generationIndex + 1);
+    }
 
     return (
         <div className="App">
             <form onSubmit={handleSubmit}>
                 <p>Enter p:</p>
-                <input type="number" id="pValue" step="any" />
+                <input type="number" id="pValue" step="any" onChange={
+                    (event) => {
+                        if (event.target.value >= 0 && event.target.value <= 1) {
+                            document.getElementById('qValue').value = precisionRound(1 - event.target.value, 3);
+                        }
+                        else {
+                            console.log("Invalid");
+                        }
+                    }
+                } />
                 <p>Enter q:</p>
-                <input type="number" id="qValue" step="any" />
+                <input type="number" id="qValue" step="any" onChange={
+                    (event) => {
+                        if (event.target.value >= 0 && event.target.value <= 1) {
+                            document.getElementById('pValue').value = precisionRound(1 - event.target.value, 3);
+                        }
+                        else {
+                            console.log("Invalid");
+                        }
+                    }
+                }/>
                 <p>Enter initial population size:</p>
                 <input type="number" id="initialPopulationSize" step="any" />
                 <p>Enter number of generations:</p>
