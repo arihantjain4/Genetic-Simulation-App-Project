@@ -7,82 +7,90 @@ function precisionRound(number, precision) {
     return Math.round(number * factor) / factor;
 }
 
+function generateOffspring(p, q, populationSize) {
+    let offspringPopulation = { AA: 0, Aa: 0, aa: 0 };
+
+    for (let i = 0; i < populationSize; i++) {
+        let parent1 = Math.random();
+        let parent2 = Math.random();
+        let allele1 = parent1 < p ? "A" : "a";
+        let allele2 = parent2 < p ? "A" : "a";
+        let offspring = allele1 + allele2;
+
+        if (offspring === "Aa" || offspring === "aA") {
+            offspringPopulation.Aa++;
+        } else if (offspring === "AA") {
+            offspringPopulation.AA++;
+        } else {
+            offspringPopulation.aa++;
+        }
+    }
+
+    let newP = (2 * offspringPopulation.AA + offspringPopulation.Aa) / (2 * populationSize);
+    let newQ = 1 - newP;
+
+    return { newP, newQ, offspringPopulation };
+}
+
 function App() {
     const [pValue, setPValue] = useState(null);
     const [qValue, setQValue] = useState(null);
     const [initialPopulationSize, setInitialPopulationSize] = useState(null);
-    const [homozygousDominant, setHomozygousDominant ] = useState(0);
-    const [heterozygous, setHeterozygous ] = useState(0);
-    const [homozygousRecessive, setHomozygousRecessive ] = useState(0);
-    const [equationTex, setEquationTex] = useState(``);
-    function handleSubmit(event) {
+    const [generationCount, setGenerationCount] = useState(null);
+    const [generationData, setGenerationData] = useState([]);
 
+    function handleSubmit(event) {
         event.preventDefault();
         const pValue = Number(document.getElementById('pValue').value);
         const qValue = Number(document.getElementById('qValue').value);
         const initialPopulationSize = Number(document.getElementById('initialPopulationSize').value);
+        const generationCount = Number(document.getElementById('generationCount').value);
+        let currentP = pValue;
+        let currentQ = qValue;
+        let generations = [];
+
+        for (let i = 0; i < generationCount; i++) {
+            const { newP, newQ, offspringPopulation } = generateOffspring(currentP, currentQ, initialPopulationSize);
+            generations.push(offspringPopulation);
+            currentP = newP;
+            currentQ = newQ;
+        }
+
         setPValue(pValue);
         setQValue(qValue);
         setInitialPopulationSize(initialPopulationSize);
-        setEquationTex(`${pValue}^2+2*${pValue}*${qValue}+${qValue}^2=1`);
-        let newHomozygousDominant = pValue * pValue;
-        let newHeterozygous = 2 * pValue * qValue;
-        let newHomozygousRecessive = qValue * qValue;
-        setHomozygousDominant(newHomozygousDominant);
-        setHeterozygous(newHeterozygous);
-        setHomozygousRecessive(newHomozygousRecessive);
-        // document.getElementById('homozygousDominant').innerHTML = `Gen 1 population that is homozygous dominant: \(${Math.round(homozygousDominant*initialPopulationSize)}\)`;
-        // document.getElementById('heterozygous').innerHTML = `Gen 1 population that is heterozygous: \(${Math.round(heterozygous*initialPopulationSize)}\)`;
-        // document.getElementById('homozygousRecessive').innerHTML = `Gen 1 population that is homozygous recessive: \(${Math.round(homozygousRecessive*initialPopulationSize)}\)`;
-    
-    
-    
-    
+        setGenerationCount(generationCount);
+        setGenerationData(generations);
     }
+
     return (
         <div className="App">
             <form onSubmit={handleSubmit}>
                 <p>Enter p:</p>
-                <input type="number" id="pValue" step="any" onChange={
-                    (event) => {
-                        if (event.target.value > 1 || event.target.value < 0) {
-                            console.log("invalid");
-                        }
-                        else {
-                            document.getElementById('qValue').value = precisionRound(1 - event.target.value, 3);
-                        }
-                    }
-                }/>
+                <input type="number" id="pValue" step="any" />
                 <p>Enter q:</p>
-                <input type="number" id="qValue" step="any" onChange={
-                    (event) => {
-                        if (event.target.value > 1 || event.target.value < 0) {
-                            console.log("invalid");
-                        }
-                        else {
-                            document.getElementById('pValue').value = 1 - event.target.value;
-                        }
-                    }
-                }/>
+                <input type="number" id="qValue" step="any" />
                 <p>Enter initial population size:</p>
-                <input type="number" id="initialPopulationSize" step="any"/>
+                <input type="number" id="initialPopulationSize" step="any" />
+                <p>Enter number of generations:</p>
+                <input type="number" id="generationCount" step="1" />
                 <input type="submit" value="Submit" />
             </form>
 
-            <MathComponent tex={equationTex} />
-            
-            <p id="homozygousDominant">
-                Gen 1 population that is <strong>homozygous dominant</strong>:
-                {pValue && initialPopulationSize ? <MathComponent tex={`${pValue}^2\\times${initialPopulationSize}=${(pValue*pValue).toFixed(3)}\\times${initialPopulationSize}\\approx${Math.round(pValue*pValue*initialPopulationSize)}`}/> : ""}
-            </p>
-            <p id="heterozygous">
-                Gen 1 population that is <strong>heterozygous</strong>:
-                {pValue && qValue && initialPopulationSize ? <MathComponent tex={`2\\times${pValue}\\times${qValue}\\times${initialPopulationSize}=${(2*pValue*qValue).toFixed(3)}\\times${initialPopulationSize}\\approx${Math.round(2*pValue*qValue*initialPopulationSize)}`}/> : ""}
-            </p>
-            <p id="homozygousRecessive">
-                Gen 1 population that is <strong>homozygous recessive</strong>:
-                {qValue && initialPopulationSize ? <MathComponent tex={`${qValue}^2\\times${initialPopulationSize}=${(qValue*qValue).toFixed(3)}\\times${initialPopulationSize}\\approx${Math.round(qValue*qValue*initialPopulationSize)}`}/> : ""}
-            </p>
+            {generationData.map((generation, index) => (
+                <div key={index}>
+                    <h3>Generation {index + 1}</h3>
+                    <p>
+                        Homozygous dominant (AA): {generation.AA}
+                    </p>
+                    <p>
+                        Heterozygous (Aa): {generation.Aa}
+                    </p>
+                    <p>
+                        Homozygous recessive (aa): {generation.aa}
+                    </p>
+                </div>
+            ))}
         </div>
     );
 }
