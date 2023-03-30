@@ -91,6 +91,7 @@ function App() {
         setGenerationCount(generationCount);
         setReplacement(replacement);
         setGenerationData(generations);
+        console.log("Generation # " + generationIndex + ": " + pValue + " " + qValue);
     }
     function handleNaturalSelectionSubmit(event) {
         event.preventDefault();
@@ -101,18 +102,20 @@ function App() {
         const killRates = {AA: AA_kill, Aa: Aa_kill, aa: aa_kill};
         setKillRates(killRates);
 
-        const currentGeneration = generationData[generationIndex];
+        const currentGeneration = generationData[generationIndex]; // after people died
         const {newP, newQ, offspringPopulation} = applyNaturalSelection(currentGeneration, killRates);
-
+        console.log("currentGeneration: " + JSON.stringify(currentGeneration));
+        console.log("applyNatural selection return: " + JSON.stringify({newP, newQ, offspringPopulation}));
         if (generationIndex + 1 < generationCount) {
             const {
                 newP: nextP,
                 newQ: nextQ,
                 offspringPopulation: nextOffspringPopulation
             } = generateOffspring(newP, newQ, initialPopulationSize, replacement);
+            console.log("nextOffspringPopulation: " + JSON.stringify(nextOffspringPopulation)); // what is displayed (before killing 2nd gen)
             setGenerationData([
                 ...generationData.slice(0, generationIndex + 1),
-                nextOffspringPopulation,
+                    nextOffspringPopulation,
                 ...generationData.slice(generationIndex + 2),
             ]);
         }
@@ -159,20 +162,72 @@ function App() {
                 </p>
                 <input type="submit" value="Submit" />
             </form>
-            {generationData.map((generation, index) => (
-                <div key={index}>
-                    <h3>Generation {index + 1}</h3>
-                    <p>
-                        Homozygous dominant (AA): {generation.AA}
-                    </p>
-                    <p>
-                        Heterozygous (Aa): {generation.Aa}
-                    </p>
-                    <p>
-                        Homozygous recessive (aa): {generation.aa}
-                    </p>
-                </div>
-            ))}
+            <div>
+                <h2>Generation {generationIndex + 1}</h2>
+                {/*<p>*/}
+                {/*    p: {generationData[generationIndex] ? generationData[generationIndex][0] : ""}*/}
+                {/*</p>*/}
+                {/*<p>*/}
+                {/*    q: {generationData[generationIndex] ? generationData[generationIndex][1] : ""}*/}
+                {/*</p>*/}
+                {/*<p style={{fontSize: 10}}>*/}
+                {/*    After natural selection. Input zeros for kill rates to skip natural selection.*/}
+                {/*</p>*/}
+                <h3>Before Death:</h3>
+                <p>
+                    Homozygous dominant (AA): {generationData[generationIndex]?.AA}
+                </p>
+                <p>
+                    Heterozygous (Aa): {generationData[generationIndex]?.Aa}
+                </p>
+                <p>
+                    Homozygous recessive (aa): {generationData[generationIndex]?.aa}
+                </p>
+                <h3>After Death:</h3>
+                <p>
+                    Homozygous dominant (AA): {generationData[generationIndex + 1]?.AA}
+                </p>
+                <p>
+                    Heterozygous (Aa): {generationData[generationIndex + 1]?.Aa}
+                </p>
+                <p>
+                    Homozygous recessive (aa): {generationData[generationIndex + 1]?.aa}
+                </p>
+                <form onSubmit={handleNaturalSelectionSubmit}>
+                    <p>Enter kill rate (%) for AA:</p>
+                    <input type="number" id="AA_kill" step="any" />
+                    <p>Enter kill rate (%) for Aa:</p>
+                    <input type="number" id="Aa_kill" step="any" />
+                    <p>Enter kill rate (%) for aa:</p>
+                    <input type="number" id="aa_kill" step="any" />
+                    <button id="previousGeneration" onClick={
+                        (event) => {
+                            event.preventDefault();
+                            if (generationIndex > 0) {
+                                setGenerationIndex(generationIndex - 1);
+                            }
+                        }
+                    }>
+                        Back
+                    </button>
+                    <input type="submit" value="Next Generation" />
+
+                </form>
+
+            </div>
+            {/*{generationData.map((generation, index) => (*/}
+            {/*    <div key={index}>*/}
+            {/*        <h3>Generation {index + 1}</h3>*/}
+            {/*        <p>*/}
+            {/*            Homozygous dominant (AA): {generation.AA}*/}
+            {/*        </p>*/}
+            {/*        <p>*/}
+            {/*            Heterozygous (Aa): {generation.Aa}*/}
+            {/*        <p>*/}
+            {/*            Homozygous recessive (aa): {generation.aa}*/}
+            {/*        </p>*/}
+            {/*    </div>*/}
+            {/*))}*/}
         </div>
     );
 }
