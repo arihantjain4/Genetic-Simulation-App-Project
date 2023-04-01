@@ -14,14 +14,13 @@ function App() {
     const [killRates, setKillRates] = useState({ AA: 0, Aa: 0, aa: 0 });
     const [generationIndex, setGenerationIndex] = useState(0);
     const [generationDeathIndex, setGenerationDeathIndex] = useState(0);
-
     function handleSubmit(event) {
         event.preventDefault();
         const pValue = Number(document.getElementById('pValue').value);
         const qValue = Number(document.getElementById('qValue').value);
         const initialPopulationSize = Number(document.getElementById('initialPopulationSize').value);
         const generationCount = Number(document.getElementById('generationCount').value);
-        const replacement = document.getElementById('replacement').checked;
+
         let currentP = pValue;
         let currentQ = qValue;
         let generations = [];
@@ -76,8 +75,11 @@ function App() {
             <div className="main">
                 <div className="forms">
                     <form onSubmit={handleSubmit}>
-                        <div className="alleleFrequency">
-                            <p>p:</p>
+                        <div className="alleleFrequency" >
+                            <p style={{
+                                marginRight: "10px",
+                                color: "#B97D37"
+                            }}>p:</p>
                             <input className="roundInputSmall" type="number" id="pValue" step="any" onChange={
                                 (event) => {
                                     if (event.target.value >= 0 && event.target.value <= 1) {
@@ -87,8 +89,13 @@ function App() {
                                         console.log("Invalid");
                                     }
                                 }
-                            } />
-                            <p>q:</p>
+                            } style={{
+                                marginRight: "15px"
+                            }} required={true}/>
+                            <p style={{
+                                marginRight: "10px",
+                                color: "#455DB0"
+                            }}>q:</p>
                             <input className="roundInputSmall" type="number" id="qValue" step="any" onChange={
                                 (event) => {
                                     if (event.target.value >= 0 && event.target.value <= 1) {
@@ -98,76 +105,96 @@ function App() {
                                         console.log("Invalid");
                                     }
                                 }
-                            }/>
+                            } required={true}/>
                         </div>
                         <p>initial population size</p>
-                        <input className="roundInput" type="number" id="initialPopulationSize" step="any" />
+                        <input className="roundInput" type="number" id="initialPopulationSize" step="any" required={true} />
                         <p>number of generations</p>
-                        <input className="roundInput" type="number" id="generationCount" step="1" />
+                        <input className="roundInput" type="number" id="generationCount" step="1" required={true} />
                         <p>
-                            <label>
-                                <input type="checkbox" id="replacement" defaultChecked />
-                                Sample with replacement
-                            </label>
+                            sample with replacement
                         </p>
-                        <input type="submit" value="Submit" />
+                        <div className="replacementYesNo" style={{marginBottom: "15px"}}>
+                            <button type="button" className="replacementYes" style={{
+                                marginRight: "25px"
+                            }} onClick={() => setReplacement(true)}>
+                                yes
+                            </button>
+                            <button type="button" className="replacementNo" onClick={() => setReplacement(false)}>
+                                no
+                            </button>
+                        </div>
+                        <input type="submit" value="submit" className="initialSubmit" />
                     </form>
-                    <form onSubmit={handleNaturalSelectionSubmit}>
-                        <p>Enter kill rate (%) for AA:</p>
-                        <input type="number" id="AA_kill" step="any" />
-                        <p>Enter kill rate (%) for Aa:</p>
-                        <input type="number" id="Aa_kill" step="any" />
-                        <p>Enter kill rate (%) for aa:</p>
-                        <input type="number" id="aa_kill" step="any" />
-                        <button id="previousGeneration" onClick={
-                            (event) => {
-                                event.preventDefault();
-                                if (generationIndex > 0) {
-                                    setGenerationIndex(generationIndex - 1);
+                    <form onSubmit={handleNaturalSelectionSubmit} className="naturalSelectionForm">
+                        <p>kill rate % for <span style={{color: "#3E6A39"}}>homozygous dominant</span> (AA) </p>
+                        <input type="number" id="AA_kill" step="any" className="roundInput"/>
+                        <p>kill rate % for <span style={{color: "#887B55"}}>heterozygous</span> (Aa) </p>
+                        <input type="number" id="Aa_kill" step="any" className="roundInput"/>
+                        <p>kill rate % for <span style={{color: "#DC4850"}}>homozygous recessive</span> (Aa) </p>
+                        <input type="number" id="aa_kill" step="any" className="roundInput" />
+                        <div style={{
+                            marginTop: "15px"
+                        }}>
+                            <button className="backButton" type="button" id="previousGeneration" onClick={
+                                (event) => {
+                                    event.preventDefault();
+                                    if (generationIndex > 0) {
+                                        setGenerationIndex(generationIndex - 1);
+                                    }
                                 }
-                            }
-                        }>
-                            Back
-                        </button>
-                        <input type="submit" value="Next Generation" />
+                            } style={{
+                                marginRight: "10px"
+                            }}>
+                                back
+                            </button>
+                            <input type="submit" value="next generation" className="initialSubmit"/>
+                        </div>
 
                     </form>
                 </div>
                 <div className="stats">
-                    <h2>Generation {generationIndex + 1}</h2>
+                    <h2>generation <span className="purpleText">{generationIndex + 1}</span></h2>
 
-                    <h3>Before Death:</h3>
-                    <p>
-                        p: {calcPValue(generationData[generationIndex])}
-                    </p>
-                    <p>
-                        q: {calcQValue(generationData[generationIndex])}
-                    </p>
-                    <p>
-                        Homozygous dominant (AA): {generationData[generationIndex]?.AA}
-                    </p>
-                    <p>
-                        Heterozygous (Aa): {generationData[generationIndex]?.Aa}
-                    </p>
-                    <p>
-                        Homozygous recessive (aa): {generationData[generationIndex]?.aa}
-                    </p>
-                    <h3>After Death:</h3>
-                    <p>
-                        p: {calcPValue(generationDeathData[generationDeathIndex-1])}
-                    </p>
-                    <p>
-                        q: {calcQValue(generationDeathData[generationDeathIndex-1])}
-                    </p>
-                    <p>
-                        Homozygous dominant (AA): {generationDeathData[generationDeathIndex-1]?.AA}
-                    </p>
-                    <p>
-                        Heterozygous (Aa): {generationDeathData[generationDeathIndex-1]?.Aa}
-                    </p>
-                    <p>
-                        Homozygous recessive (aa): {generationDeathData[generationDeathIndex-1]?.aa}
-                    </p>
+                    <div className="beforeDeathStats" style={{marginBottom: "25px"}}>
+                        <h3>before death:</h3>
+                        <p>
+                            p: <span className="purpleText">{calcPValue(generationData[generationIndex])}</span>
+                        </p>
+                        <p>
+                            q: <span className="purpleText">{calcQValue(generationData[generationIndex])}</span>
+                        </p>
+                        <p>
+                            homozygous dominant (AA): <span className="purpleText"> {generationData[generationIndex]?.AA}</span>
+                        </p>
+                        <p>
+                            heterozygous (Aa): <span className="purpleText"> {generationData[generationIndex]?.Aa}</span>
+                        </p>
+                        <p>
+                            homozygous recessive (aa): <span className="purpleText"> {generationData[generationIndex]?.aa}</span>
+                        </p>
+                    </div>
+                    <div className="afterDeathStats">
+                        <h3>after death:</h3>
+                        <p>
+                            p: <span className="purpleText">{calcPValue(generationDeathData[generationDeathIndex-1])}</span>
+                        </p>
+                        <p>
+                            q: <span className="purpleText">{calcQValue(generationDeathData[generationDeathIndex-1])}</span>
+                        </p>
+                        <p>
+                            homozygous dominant (AA): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.AA}</span>
+                        </p>
+                        <p>
+                            heterozygous (Aa): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.Aa}</span>
+                        </p>
+                        <p>
+                            homozygous recessive (aa): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.aa}</span>
+                        </p>
+                    </div>
+                </div>
+                <div className="visuals">
+
                 </div>
             </div>
 

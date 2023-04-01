@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
 body {
   background-color: #ECEAD7;
 }
@@ -10,11 +11,17 @@ body {
 .main {
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
 }
 
 .forms {
   border: 3px solid black;
   border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .forms p {
@@ -25,6 +32,19 @@ body {
 .alleleFrequency {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 .roundInput {
@@ -35,14 +55,78 @@ body {
   padding-bottom: 2.5%;
   padding-left: 2.5%;
   font-size: 15px;
+  text-align: center;
 }
 
 .roundInputSmall {
-  /*border: 2px solid black;*/
-  /*border-radius: 7.88px;*/
-  /*width: 10%;*/
-  /*padding-top: 1%;*/
-  /*padding-bottom: 1%;*/
-  /*padding-left: 1%;*/
+  border: 2px solid black;
+  border-radius: 7.88px;
+  width: 10%;
+  height: 20px;
+  padding-top: 1%;
+  padding-bottom: 1%;
+  padding-left: 1%;
   /*font-size: 15px;*/
+}
+
+.replacementYesNo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.replacementYes {
+  border: 2px solid black;
+  border-radius: 7.88px;
+  background-color: white;
+  padding: 5px 25px;
+  font-family: "Plus Jakarta Sans";
+
+}
+
+.replacementNo {
+  border: 2px solid black;
+  border-radius: 7.88px;
+  background-color: white;
+  padding: 5px 25px;
+  font-family: "Plus Jakarta Sans";
+
+
+}
+
+.initialSubmit {
+    border: 2px solid black;
+    border-radius: 7.88px;
+    background-color: #DFC89A;
+    padding: 5px 25px;
+    margin-top: 10px;
+
+}
+
+.backButton {
+    border: 2px solid black;
+    border-radius: 7.88px;
+    background-color: #DFC89A;
+    padding: 5px 25px;
+    margin-top: 10px;
+    font-family: "Plus Jakarta Sans";
+
+}
+
+.naturalSelectionForm {
+  margin-bottom: 15px;
+}
+
+input {
+    font-family: Plus Jakarta Sans;
+}
+
+.stats p {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.purpleText {
+    color: #805088;
 }
