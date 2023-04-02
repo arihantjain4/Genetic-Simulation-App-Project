@@ -82,7 +82,15 @@ input[type=number] {
   background-color: white;
   padding: 5px 25px;
   font-family: "Plus Jakarta Sans";
+}
 
+.replacementYes:hover {
+  background-color: #cecece;
+}
+
+.replacementYes:active {
+    padding: 2.5px 20px;
+    margin-bottom: 5px;
 }
 
 .replacementNo {
@@ -91,9 +99,17 @@ input[type=number] {
   background-color: white;
   padding: 5px 25px;
   font-family: "Plus Jakarta Sans";
-
-
 }
+
+.replacementNo:hover {
+    background-color: #cecece;
+}
+
+.replacementNo:active {
+    padding: 2.5px 20px;
+    margin-bottom: 5px;
+}
+
 
 .initialSubmit {
     border: 2px solid black;
@@ -101,7 +117,14 @@ input[type=number] {
     background-color: #DFC89A;
     padding: 5px 25px;
     margin-top: 10px;
-
+    transition: padding 0.1s, margin-bottom 0.1s;
+}
+.initialSubmit:hover {
+    background-color: #bda576;
+}
+.initialSubmit:active {
+    padding: 2.5px 20px;
+    margin-bottom: 5px;
 }
 
 .backButton {
@@ -129,4 +152,9 @@ input {
 
 .purpleText {
     color: #805088;
+}
+
+.visuals {
+    display: inline;
+    max-width: 300px;
 }

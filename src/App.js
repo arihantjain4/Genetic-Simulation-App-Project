@@ -2,7 +2,8 @@ import { useState } from 'react';
 import './App.css';
 import { MathComponent } from "mathjax-react";
 import { precisionRound, calcPValue, calcQValue, generateOffspring, applyNaturalSelection } from "./Simulation";
-
+import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 function App() {
     const [pValue, setPValue] = useState(null);
     const [qValue, setQValue] = useState(null);
@@ -14,6 +15,21 @@ function App() {
     const [killRates, setKillRates] = useState({ AA: 0, Aa: 0, aa: 0 });
     const [generationIndex, setGenerationIndex] = useState(0);
     const [generationDeathIndex, setGenerationDeathIndex] = useState(0);
+    const [dataValues, setDataValues] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: "p",
+                data: [],
+                fill: false,
+            },
+            {
+                label: "q",
+                data: [],
+                fill: false,
+            }
+        ]
+    });
     function handleSubmit(event) {
         event.preventDefault();
         const pValue = Number(document.getElementById('pValue').value);
@@ -63,10 +79,26 @@ function App() {
 
         setPValue(newP);
         setQValue(newQ);
+        console.log("Generation (before incrementing) # " + generationIndex + ": " + newP + " " + newQ);
+        console.log("Generation data (before incrementing): " + JSON.stringify(generationData));
         setGenerationIndex(generationIndex + 1);
+        setDataValues({
+            labels: [...dataValues.labels, generationIndex],
+            datasets: [
+                {
+                    label: "p",
+                    data: [...dataValues.datasets[0].data, calcPValue(generationData[generationIndex])],
+                    fill: false,
+                },
+                {
+                    label: "q",
+                    data: [...dataValues.datasets[1].data, calcQValue(generationData[generationIndex])],
+                    fill: false,
+                }
+            ]
+        });
         setGenerationDeathIndex(generationDeathIndex + 1);
     }
-
     return (
         <div className="App">
             <h1>
@@ -117,10 +149,18 @@ function App() {
                         <div className="replacementYesNo" style={{marginBottom: "15px"}}>
                             <button type="button" className="replacementYes" style={{
                                 marginRight: "25px"
-                            }} onClick={() => setReplacement(true)}>
+                            }} onClick={() => {
+                                setReplacement(true);
+                                document.getElementsByClassName('replacementYes')[0].style.backgroundColor = "#cecece";
+                                document.getElementsByClassName('replacementNo')[0].style.backgroundColor = "#fff";
+                            }}>
                                 yes
                             </button>
-                            <button type="button" className="replacementNo" onClick={() => setReplacement(false)}>
+                            <button type="button" className="replacementNo" onClick={() => {
+                                setReplacement(false);
+                                document.getElementsByClassName('replacementNo')[0].style.backgroundColor = "#cecece";
+                                document.getElementsByClassName('replacementYes')[0].style.backgroundColor = "#fff";
+                            }}>
                                 no
                             </button>
                         </div>
@@ -150,7 +190,6 @@ function App() {
                             </button>
                             <input type="submit" value="next generation" className="initialSubmit"/>
                         </div>
-
                     </form>
                 </div>
                 <div className="stats">
@@ -194,12 +233,20 @@ function App() {
                     </div>
                 </div>
                 <div className="visuals">
-
+                    <Line data={dataValues} />
+                    <div className="population">
+                        {generationData.length > 0 && generationData[generationIndex].AA >= 1 ? [...Array(generationData[generationIndex].AA)].map((e, i) => {
+                            return <img width="30" height="30" src={require("./assets/greenman.svg").default} alt="AA" className="AA"/>
+                        }) : null}
+                        {generationData.length > 0 && generationData[generationIndex].Aa >= 1 ? [...Array(generationData[generationIndex].Aa)].map((e, i) => {
+                            return <img width="30" height="30" src={require("./assets/brownman.svg").default} alt="Aa" className="Aa"/>
+                        }) : null}
+                        {generationData.length > 0 && generationData[generationIndex].aa >= 1 ? [...Array(generationData[generationIndex].aa)].map((e, i) => {
+                            return <img width="30" height="30" src={require("./assets/redman.svg").default} alt="aa" className="aa"/>
+                        }) : null}
+                    </div>
                 </div>
             </div>
-
-
-
         </div>
     );
 }
