@@ -4,7 +4,13 @@ import { MathComponent } from "mathjax-react";
 import { precisionRound, calcPValue, calcQValue, generateOffspring, applyNaturalSelection } from "./Simulation";
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import {Chart, scales} from "chart.js";
+// Chart.defaults.global.defaultFontFamily = 'Plus Jakarta Sans';
+
+
 function App() {
+
+
     const [pValue, setPValue] = useState(null);
     const [qValue, setQValue] = useState(null);
     const [initialPopulationSize, setInitialPopulationSize] = useState(null);
@@ -22,11 +28,13 @@ function App() {
                 label: "p",
                 data: [],
                 fill: false,
+                backgroundColor: "#B97D37"
             },
             {
                 label: "q",
                 data: [],
                 fill: false,
+                backgroundColor: "#455DB0"
             }
         ]
     });
@@ -188,7 +196,12 @@ function App() {
                             }}>
                                 back
                             </button>
-                            <input type="submit" value="next generation" className="initialSubmit"/>
+                            <input type="submit" value="next generation" className="initialSubmit" onClick={(event) => {
+                                if (generationIndex >= generationCount-1) {
+                                    event.preventDefault();
+                                }
+                            }
+                            }/>
                         </div>
                     </form>
                 </div>
@@ -233,7 +246,83 @@ function App() {
                     </div>
                 </div>
                 <div className="visuals">
-                    <Line data={dataValues} />
+                    <Line height="300px" data={dataValues} options={
+                        {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {
+                                        usePointStyle: true,
+                                        generateLabels(chart) {
+                                            return chart.data.datasets.map(
+                                                (dataset, i) => ({
+                                                    text: dataset.label,
+                                                    fillStyle: dataset.backgroundColor,
+                                                    strokeStyle: dataset.backgroundColor,
+                                                    pointStyle: 'circle',
+                                                })
+                                            )
+                                        }
+
+                                    }
+                                },
+
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Generation',
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold',
+                                            family: 'Plus Jakarta Sans',
+                                        },
+                                        color: '#000'
+                                    },
+                                    ticks: {
+                                        display: true,
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold',
+                                            family: 'Plus Jakarta Sans',
+                                        },
+                                        color: '#000'
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Frequency',
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold',
+                                            family: 'Plus Jakarta Sans',
+                                        },
+                                        color: '#000'
+                                    },
+                                    ticks: {
+                                        display: true,
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold',
+                                            family: 'Plus Jakarta Sans',
+                                        },
+                                        color: '#000',
+                                        stepSize: 0.1
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    } style={{marginBottom: "30px"}}/>
                     <div className="population">
                         {generationData.length > 0 && generationData[generationIndex].AA >= 1 ? [...Array(generationData[generationIndex].AA)].map((e, i) => {
                             return <img width="30" height="30" src={require("./assets/greenman.svg").default} alt="AA" className="AA"/>
