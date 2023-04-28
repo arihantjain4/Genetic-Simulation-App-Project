@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import { MathComponent } from "mathjax-react";
 import { precisionRound, calcPValue, calcQValue, generateOffspring, applyNaturalSelection } from "./Simulation";
@@ -13,6 +13,8 @@ function App() {
 
     const [pValue, setPValue] = useState(null);
     const [qValue, setQValue] = useState(null);
+    const [pValueEntry, setPValueEntry] = useState(0.5);
+    const [qValueEntry, setQValueEntry] = useState(0.5);
     const [initialPopulationSize, setInitialPopulationSize] = useState(null);
     const [generationCount, setGenerationCount] = useState(null);
     const [replacement, setReplacement] = useState(true);
@@ -21,6 +23,15 @@ function App() {
     const [killRates, setKillRates] = useState({ AA: 0, Aa: 0, aa: 0 });
     const [generationIndex, setGenerationIndex] = useState(0);
     const [generationDeathIndex, setGenerationDeathIndex] = useState(0);
+    const [started, setStarted] = useState(false);
+    const [generationViewing, setGenerationViewing] = useState(0);
+    const [generationDeathViewing, setGenerationDeathViewing] = useState(0);
+
+
+    useEffect(() => {
+        setGenerationViewing(generationIndex);
+        setGenerationDeathViewing(generationDeathIndex);
+    }, [generationIndex, generationDeathIndex])
     const [dataValues, setDataValues] = useState({
         labels: [],
         datasets: [
@@ -40,8 +51,8 @@ function App() {
     });
     function handleSubmit(event) {
         event.preventDefault();
-        const pValue = Number(document.getElementById('pValue').value);
-        const qValue = Number(document.getElementById('qValue').value);
+       const pValue = pValueEntry
+        const qValue = qValueEntry;
         const initialPopulationSize = Number(document.getElementById('initialPopulationSize').value);
         const generationCount = Number(document.getElementById('generationCount').value);
 
@@ -109,9 +120,17 @@ function App() {
     }
     return (
         <div className="App">
-            <h1>
-                hardy-weinberg visualization
-            </h1>
+           
+            <div id = "begin"  className = {(started? "start":"notstart")}>
+
+                <h1>
+                    Hardy Weinberg Visualization
+                </h1>
+                <button id = "start" onClick={() => setStarted(prev => !prev)}> 
+                Begin
+                </button>
+            </div>
+            {started && 
             <div className="main">
                 <div className="forms">
                     <form onSubmit={handleSubmit}>
@@ -119,33 +138,28 @@ function App() {
                             <p style={{
                                 marginRight: "10px",
                                 color: "#B97D37"
-                            }}>p:</p>
-                            <input className="roundInputSmall" type="number" id="pValue" step="any" onChange={
-                                (event) => {
-                                    if (event.target.value >= 0 && event.target.value <= 1) {
-                                        document.getElementById('qValue').value = precisionRound(1 - event.target.value, 3);
-                                    }
-                                    else {
-                                        console.log("Invalid");
-                                    }
-                                }
-                            } style={{
-                                marginRight: "15px"
-                            }} required={true}/>
+                            }}>p: <input type = "number" value = {pValueEntry.toFixed(2)} step = "0.01" style = {{width: 50, outline: "none", border: "none", borderBottom: "2px solid blue"}} onChange = {e => {
+                                setPValueEntry(+e.target.value);
+                                setQValueEntry(1 - +e.target.value);
+                            }} /> </p>
+                        <input type = {"range"} min = "0" max = "1" step = "0.01" value = {pValueEntry} onChange = {e => {
+                            setPValueEntry(+e.target.value);
+                            setQValueEntry(1 - +e.target.value);
+                        }} required = {true} />
+                        </div>
+                        <div className='alleleFrequency'>
+
                             <p style={{
                                 marginRight: "10px",
                                 color: "#455DB0"
-                            }}>q:</p>
-                            <input className="roundInputSmall" type="number" id="qValue" step="any" onChange={
-                                (event) => {
-                                    if (event.target.value >= 0 && event.target.value <= 1) {
-                                        document.getElementById('pValue').value = precisionRound(1 - event.target.value, 3);
-                                    }
-                                    else {
-                                        console.log("Invalid");
-                                    }
-                                }
-                            } required={true}/>
+                            }}>q: <input type = "number" value = {qValueEntry.toFixed(2)} step = "0.01" style = {{width: 50, outline: "none", border: "none", borderBottom: "2px solid blue"}} onChange = {e => {
+                                setQValueEntry(+e.target.value);
+                                setPValueEntry(1 - +e.target.value);
+                            }} /> </p>
+                           <input type = {"range"} min = "0" max = "1" step = "0.01" value = {qValueEntry} onChange = {e => {
+                            setQValueEntry(+e.target.value);
+                            setPValueEntry(1 - +e.target.value);
+                            }} required = {true} />
                         </div>
                         <p>initial population size</p>
                         <input className="roundInput" type="number" id="initialPopulationSize" step="any" required={true} />
@@ -155,7 +169,8 @@ function App() {
                             sample with replacement
                         </p>
                         <div className="replacementYesNo" style={{marginBottom: "15px"}}>
-                            <button type="button" className="replacementYes" style={{
+                            Replacement: <input type = "checkbox" value={{replacement}} onChange = {e => setReplacement(e.target.value)} />
+                            {/* <button type="button" className="replacementYes" style={{
                                 marginRight: "25px"
                             }} onClick={() => {
                                 setReplacement(true);
@@ -170,7 +185,7 @@ function App() {
                                 document.getElementsByClassName('replacementYes')[0].style.backgroundColor = "#fff";
                             }}>
                                 no
-                            </button>
+                            </button> */}
                         </div>
                         <input type="submit" value="submit" className="initialSubmit" />
                     </form>
@@ -206,16 +221,34 @@ function App() {
                     </form>
                 </div>
                 <div className="stats">
-                    <h2>generation <span className="purpleText">{generationIndex + 1}</span></h2>
-
+                    <h2> 
+                        <button className='change' disabled = {generationViewing == 0} onClick={() => {
+                            setGenerationViewing(prev => Math.max(0, prev - 1));
+                            setGenerationDeathViewing(prev => Math.max(1, prev - 1));
+                        }}> {"<"} Prev </button>  
+                        Generation <span className="purpleText">{generationViewing + 1}</span>
+                        <button disabled = {generationViewing == generationIndex} className = 'change' onClick={() => {
+                            setGenerationViewing(prev => prev + 1);
+                            setGenerationDeathViewing(prev => prev + 1);
+                        }}>  Next {">"}</button> 
+                        </h2>
+                    <div style = {{display: "grid", gridTemplateColumns: "repeat(2, auto)", columnGap: 50}}>
                     <div className="beforeDeathStats" style={{marginBottom: "25px"}}>
-                        <h3>before death:</h3>
-                        <p>
+                        <h3>Before Death:</h3>
+                        <div style = {{width: 200, display: "-ms-flexbox", overflow: "hidden", margin: "auto", justifyContent: "center", alignItems:"center"}}>
+                        <div style = {{width: (calcPValue(generationData[generationViewing]) || 0) * 200, height: 50, background: "orange", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
+                          {calcPValue(generationData[generationViewing]) > 0.2  ? "p=" +  ("" + calcPValue(generationData[generationViewing]).toFixed(2)).substring(1) : "p"}
+                        </div>
+                        <div style = {{width: (calcQValue(generationData[generationViewing])  || 0) * 200, height: 50, background: "purple", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
+                             {calcQValue(generationData[generationViewing]) > 0.2 ? "q=" + ("" + calcQValue(generationData[generationViewing]).toFixed(2)).substring(1) : "q"}
+                            </div>
+                        </div>
+                        {/* <p>
                             p: <span className="purpleText">{calcPValue(generationData[generationIndex])}</span>
                         </p>
                         <p>
                             q: <span className="purpleText">{calcQValue(generationData[generationIndex])}</span>
-                        </p>
+                        </p> */}
                         <p>
                             homozygous dominant (AA): <span className="purpleText"> {generationData[generationIndex]?.AA}</span>
                         </p>
@@ -227,13 +260,15 @@ function App() {
                         </p>
                     </div>
                     <div className="afterDeathStats">
-                        <h3>after death:</h3>
-                        <p>
-                            p: <span className="purpleText">{calcPValue(generationDeathData[generationDeathIndex-1])}</span>
-                        </p>
-                        <p>
-                            q: <span className="purpleText">{calcQValue(generationDeathData[generationDeathIndex-1])}</span>
-                        </p>
+                        <h3>After Death:</h3>
+                        <div style = {{width: 200, display: "-ms-flexbox", overflow: "hidden", margin: "auto", justifyContent: "center", alignItems:"center"}}>
+                        <div style = {{width: (calcPValue(generationDeathData[generationDeathViewing - 1]) || 0) * 200, height: 50, background: "orange", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
+                          {calcPValue(generationDeathData[generationDeathViewing - 1]) > 0.2  ? "p=" +  ("" + calcPValue(generationDeathData[generationDeathViewing - 1]).toFixed(2)).substring(1) : "p"}
+                        </div>
+                        <div style = {{width: (calcQValue(generationDeathData[generationDeathViewing - 1])  || 0) * 200, height: 50, background: "purple", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
+                             {calcQValue(generationDeathData[generationDeathViewing - 1]) > 0.2 ? "q=" + ("" + calcQValue(generationDeathData[generationDeathViewing - 1]).toFixed(2)).substring(1) : "q"}
+                            </div>
+                        </div>
                         <p>
                             homozygous dominant (AA): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.AA}</span>
                         </p>
@@ -243,6 +278,7 @@ function App() {
                         <p>
                             homozygous recessive (aa): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.aa}</span>
                         </p>
+                    </div>
                     </div>
                 </div>
                 <div className="visuals">
@@ -335,7 +371,7 @@ function App() {
                         }) : null}
                     </div>
                 </div>
-            </div>
+            </div>}
         </div>
     );
 }
