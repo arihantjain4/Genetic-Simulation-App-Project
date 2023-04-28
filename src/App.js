@@ -6,10 +6,8 @@ import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import {Chart, scales} from "chart.js";
 import Data from "./Data";
+
 // Chart.defaults.global.defaultFontFamily = 'Plus Jakarta Sans';
-
-
-
 const App = () => {
 
 
@@ -29,6 +27,7 @@ const App = () => {
     const [generationViewing, setGenerationViewing] = useState(0);
     const [generationDeathViewing, setGenerationDeathViewing] = useState(0);
     const [size, setSize] = useState(0);
+    const [time, setTime] = useState(0);
 
 
     useEffect(() => {
@@ -39,6 +38,25 @@ const App = () => {
     useEffect(() => {
         setGenerationDeathViewing(generationDeathIndex);
     }, [generationDeathIndex])
+
+    useEffect(() => {
+    //    if (pValue != null)
+        setTimeout(() => {
+            if (pValue != null) {
+           if (generationIndex < generationCount - 1) {
+                handleNaturalSelectionSubmit();
+            //    }
+             //   else {
+                    setGenerationViewing(prev => prev + 1);
+                    setGenerationDeathViewing(prev => prev + 1);
+            //     }
+            // }
+           }
+        }
+                setTime(prev => prev + 1);
+            
+        }, 1000)
+    }, [time])
 
 
     const [dataValues, setDataValues] = useState({
@@ -126,6 +144,7 @@ const App = () => {
                 <h1>
                     Hardy Weinberg Visualization
                 </h1>
+                <h2> By Sid and Arihant </h2>
                 <button id = "start" onClick={() => setStarted(prev => !prev)}> 
                 Begin
                 </button>
@@ -195,7 +214,7 @@ const App = () => {
                         <input 
                             type="number" 
                             value = {killRates.aa} 
-                            onChange = {e => {setKillRates(prev => ({...prev, AA: e.target.value}))}} 
+                            onChange = {e => {setKillRates(prev => ({...prev, aa: e.target.value}))}} 
                             id="AA_kill" 
                             step="any" 
                             className="roundInput"/>
