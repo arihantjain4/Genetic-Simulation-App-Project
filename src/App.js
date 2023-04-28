@@ -8,6 +8,7 @@ import {Chart, scales} from "chart.js";
 // Chart.defaults.global.defaultFontFamily = 'Plus Jakarta Sans';
 
 
+
 function App() {
 
 
@@ -32,6 +33,8 @@ function App() {
         setGenerationViewing(generationIndex);
         setGenerationDeathViewing(generationDeathIndex);
     }, [generationIndex, generationDeathIndex])
+
+
     const [dataValues, setDataValues] = useState({
         labels: [],
         datasets: [
@@ -49,37 +52,27 @@ function App() {
             }
         ]
     });
-    function handleSubmit(event) {
+    const  handleSubmit = (event) => {
         event.preventDefault();
-       const pValue = pValueEntry
-        const qValue = qValueEntry;
+      
         const initialPopulationSize = Number(document.getElementById('initialPopulationSize').value);
         const generationCount = Number(document.getElementById('generationCount').value);
 
-        let currentP = pValue;
-        let currentQ = qValue;
+        let currentP = pValueEntry;
+        let currentQ = qValueEntry;
         let generations = [];
 
-        const { newP, newQ, offspringPopulation } = generateOffspring(currentP, currentQ, initialPopulationSize, replacement);
+        const { offspringPopulation } = generateOffspring(currentP, currentQ, initialPopulationSize, replacement);
         generations.push(offspringPopulation);
-        console.log("generations: " + JSON.stringify(generations));
-        setPValue(pValue);
-        setQValue(qValue);
+        setPValue(pValueEntry);
+        setQValue(qValueEntry);
         setInitialPopulationSize(initialPopulationSize);
         setGenerationCount(generationCount);
         setReplacement(replacement);
         setGenerationData(generations);
-        console.log("Generation # " + generationIndex + ": " + pValue + " " + qValue);
     }
-    function handleNaturalSelectionSubmit(event) {
-        event.preventDefault();
-        const AA_kill = Number(document.getElementById('AA_kill').value) / 100;
-        const Aa_kill = Number(document.getElementById('Aa_kill').value) / 100;
-        const aa_kill = Number(document.getElementById('aa_kill').value) / 100;
-
-        const killRates = {AA: AA_kill, Aa: Aa_kill, aa: aa_kill};
-        setKillRates(killRates);
-
+    const  handleNaturalSelectionSubmit = () => {
+      
         const currentGeneration = generationDeathData[generationDeathIndex-1] != null ? generationDeathData[generationDeathIndex-1] : generationData[generationIndex]; // after people died
         const {newP, newQ, offspringPopulation} = applyNaturalSelection(currentGeneration, killRates);
         console.log("currentGeneration: " + JSON.stringify(currentGeneration));
@@ -170,55 +163,35 @@ function App() {
                         </p>
                         <div className="replacementYesNo" style={{marginBottom: "15px"}}>
                             Replacement: <input type = "checkbox" value={{replacement}} onChange = {e => setReplacement(e.target.value)} />
-                            {/* <button type="button" className="replacementYes" style={{
-                                marginRight: "25px"
-                            }} onClick={() => {
-                                setReplacement(true);
-                                document.getElementsByClassName('replacementYes')[0].style.backgroundColor = "#cecece";
-                                document.getElementsByClassName('replacementNo')[0].style.backgroundColor = "#fff";
-                            }}>
-                                yes
-                            </button>
-                            <button type="button" className="replacementNo" onClick={() => {
-                                setReplacement(false);
-                                document.getElementsByClassName('replacementNo')[0].style.backgroundColor = "#cecece";
-                                document.getElementsByClassName('replacementYes')[0].style.backgroundColor = "#fff";
-                            }}>
-                                no
-                            </button> */}
+                          
                         </div>
                         <input type="submit" value="submit" className="initialSubmit" />
                     </form>
-                    <form onSubmit={handleNaturalSelectionSubmit} className="naturalSelectionForm">
-                        <p>kill rate % for <span style={{color: "#3E6A39"}}>homozygous dominant</span> (AA) </p>
-                        <input type="number" id="AA_kill" step="any" className="roundInput"/>
-                        <p>kill rate % for <span style={{color: "#887B55"}}>heterozygous</span> (Aa) </p>
-                        <input type="number" id="Aa_kill" step="any" className="roundInput"/>
-                        <p>kill rate % for <span style={{color: "#DC4850"}}>homozygous recessive</span> (Aa) </p>
-                        <input type="number" id="aa_kill" step="any" className="roundInput" />
-                        <div style={{
-                            marginTop: "15px"
-                        }}>
-                            <button className="backButton" type="button" id="previousGeneration" onClick={
-                                (event) => {
-                                    event.preventDefault();
-                                    if (generationIndex > 0) {
-                                        setGenerationIndex(generationIndex - 1);
-                                    }
-                                }
-                            } style={{
-                                marginRight: "10px"
-                            }}>
-                                back
-                            </button>
-                            <input type="submit" value="next generation" className="initialSubmit" onClick={(event) => {
-                                if (generationIndex >= generationCount-1) {
-                                    event.preventDefault();
-                                }
-                            }
-                            }/>
-                        </div>
-                    </form>
+                  
+                        <p> Kill rate % for <span style={{color: "#3E6A39"}}>homozygous dominant</span> (AA) </p>
+                        <input 
+                            type="number" 
+                            value = {killRates.AA} 
+                            onChange = {e => {setKillRates(prev => ({...prev, AA: e.target.value}))}} 
+                            id="AA_kill" 
+                            step="any" 
+                            className="roundInput"/>
+                        <p> Kill rate % for <span style={{color: "#887B55"}}>heterozygous</span> (Aa) </p>
+                        <input 
+                            type="number" 
+                            value = {killRates.AA} 
+                            onChange = {e => {setKillRates(prev => ({...prev, Aa: e.target.value}))}} 
+                            id="AA_kill" 
+                            step="any" 
+                            className="roundInput"/>
+                        <p> Kill rate % for <span style={{color: "#DC4850"}}>homozygous recessive</span> (Aa) </p>
+                        <input 
+                            type="number" 
+                            value = {killRates.AA} 
+                            onChange = {e => {setKillRates(prev => ({...prev, AA: e.target.value}))}} 
+                            id="AA_kill" 
+                            step="any" 
+                            className="roundInput"/>
                 </div>
                 <div className="stats">
                     <h2> 
@@ -227,9 +200,15 @@ function App() {
                             setGenerationDeathViewing(prev => Math.max(1, prev - 1));
                         }}> {"<"} Prev </button>  
                         Generation <span className="purpleText">{generationViewing + 1}</span>
-                        <button disabled = {generationViewing == generationIndex} className = 'change' onClick={() => {
-                            setGenerationViewing(prev => prev + 1);
-                            setGenerationDeathViewing(prev => prev + 1);
+                        <button disabled = {generationCount > 1 && generationViewing == generationCount - 1} className = 'change' onClick={() => {
+                            if (generationIndex == generationViewing && generationViewing < generationCount) {
+                            handleNaturalSelectionSubmit();
+                            }
+                            else {
+                                setGenerationViewing(prev => prev + 1);
+                                setGenerationDeathViewing(prev => prev + 1);
+                            }
+                        
                         }}>  Next {">"}</button> 
                         </h2>
                     <div style = {{display: "grid", gridTemplateColumns: "repeat(2, auto)", columnGap: 50}}>
