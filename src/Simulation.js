@@ -1,14 +1,14 @@
-export function precisionRound(number, precision) {
+export const  precisionRound = (number, precision) => {
     let factor = Math.pow(10, precision);
     return Math.round(number * factor) / factor;
 }
 
-export function calcPValue(generation){
+export const calcPValue = (generation) => {
     if (!generation) return "";
     return precisionRound((2 * generation.AA + generation.Aa) / (2 * (generation.AA + generation.Aa + generation.aa)), 3);
 }
 
-export function calcQValue(generation){
+export const calcQValue = (generation) => {
     if (!generation) return "";
     return precisionRound(1 - calcPValue(generation), 3);
 }

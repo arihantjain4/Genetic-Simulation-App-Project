@@ -5,11 +5,12 @@ import { precisionRound, calcPValue, calcQValue, generateOffspring, applyNatural
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import {Chart, scales} from "chart.js";
+import Data from "./Data";
 // Chart.defaults.global.defaultFontFamily = 'Plus Jakarta Sans';
 
 
 
-function App() {
+const App = () => {
 
 
     const [pValue, setPValue] = useState(null);
@@ -27,12 +28,17 @@ function App() {
     const [started, setStarted] = useState(false);
     const [generationViewing, setGenerationViewing] = useState(0);
     const [generationDeathViewing, setGenerationDeathViewing] = useState(0);
+    const [size, setSize] = useState(0);
 
 
     useEffect(() => {
         setGenerationViewing(generationIndex);
+        
+    }, [generationIndex])
+
+    useEffect(() => {
         setGenerationDeathViewing(generationDeathIndex);
-    }, [generationIndex, generationDeathIndex])
+    }, [generationDeathIndex])
 
 
     const [dataValues, setDataValues] = useState({
@@ -64,6 +70,7 @@ function App() {
 
         const { offspringPopulation } = generateOffspring(currentP, currentQ, initialPopulationSize, replacement);
         generations.push(offspringPopulation);
+        setSize(offspringPopulation.AA + offspringPopulation.aa + offspringPopulation.Aa)
         setPValue(pValueEntry);
         setQValue(qValueEntry);
         setInitialPopulationSize(initialPopulationSize);
@@ -179,7 +186,7 @@ function App() {
                         <p> Kill rate % for <span style={{color: "#887B55"}}>heterozygous</span> (Aa) </p>
                         <input 
                             type="number" 
-                            value = {killRates.AA} 
+                            value = {killRates.Aa} 
                             onChange = {e => {setKillRates(prev => ({...prev, Aa: e.target.value}))}} 
                             id="AA_kill" 
                             step="any" 
@@ -187,7 +194,7 @@ function App() {
                         <p> Kill rate % for <span style={{color: "#DC4850"}}>homozygous recessive</span> (Aa) </p>
                         <input 
                             type="number" 
-                            value = {killRates.AA} 
+                            value = {killRates.aa} 
                             onChange = {e => {setKillRates(prev => ({...prev, AA: e.target.value}))}} 
                             id="AA_kill" 
                             step="any" 
@@ -211,53 +218,19 @@ function App() {
                         
                         }}>  Next {">"}</button> 
                         </h2>
-                    <div style = {{display: "grid", gridTemplateColumns: "repeat(2, auto)", columnGap: 50}}>
+                    <div style = {{display: "grid", gridTemplateColumns: "repeat(1, auto)", columnGap: 50}}>
                     <div className="beforeDeathStats" style={{marginBottom: "25px"}}>
                         <h3>Before Death:</h3>
-                        <div style = {{width: 200, display: "-ms-flexbox", overflow: "hidden", margin: "auto", justifyContent: "center", alignItems:"center"}}>
-                        <div style = {{width: (calcPValue(generationData[generationViewing]) || 0) * 200, height: 50, background: "orange", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
-                          {calcPValue(generationData[generationViewing]) > 0.2  ? "p=" +  ("" + calcPValue(generationData[generationViewing]).toFixed(2)).substring(1) : "p"}
-                        </div>
-                        <div style = {{width: (calcQValue(generationData[generationViewing])  || 0) * 200, height: 50, background: "purple", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
-                             {calcQValue(generationData[generationViewing]) > 0.2 ? "q=" + ("" + calcQValue(generationData[generationViewing]).toFixed(2)).substring(1) : "q"}
-                            </div>
-                        </div>
-                        {/* <p>
-                            p: <span className="purpleText">{calcPValue(generationData[generationIndex])}</span>
-                        </p>
-                        <p>
-                            q: <span className="purpleText">{calcQValue(generationData[generationIndex])}</span>
-                        </p> */}
-                        <p>
-                            homozygous dominant (AA): <span className="purpleText"> {generationData[generationIndex]?.AA}</span>
-                        </p>
-                        <p>
-                            heterozygous (Aa): <span className="purpleText"> {generationData[generationIndex]?.Aa}</span>
-                        </p>
-                        <p>
-                            homozygous recessive (aa): <span className="purpleText"> {generationData[generationIndex]?.aa}</span>
-                        </p>
+                        <Data index = {generationViewing} data = {generationData[generationViewing]} size = {size} />
                     </div>
-                    <div className="afterDeathStats">
+                    {/* <div className="afterDeathStats">
                         <h3>After Death:</h3>
-                        <div style = {{width: 200, display: "-ms-flexbox", overflow: "hidden", margin: "auto", justifyContent: "center", alignItems:"center"}}>
-                        <div style = {{width: (calcPValue(generationDeathData[generationDeathViewing - 1]) || 0) * 200, height: 50, background: "orange", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
-                          {calcPValue(generationDeathData[generationDeathViewing - 1]) > 0.2  ? "p=" +  ("" + calcPValue(generationDeathData[generationDeathViewing - 1]).toFixed(2)).substring(1) : "p"}
-                        </div>
-                        <div style = {{width: (calcQValue(generationDeathData[generationDeathViewing - 1])  || 0) * 200, height: 50, background: "purple", display: "inline-flex", margin: 0, color: "white", justifyContent: "center", alignItems: "center"}}>
-                             {calcQValue(generationDeathData[generationDeathViewing - 1]) > 0.2 ? "q=" + ("" + calcQValue(generationDeathData[generationDeathViewing - 1]).toFixed(2)).substring(1) : "q"}
-                            </div>
-                        </div>
-                        <p>
-                            homozygous dominant (AA): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.AA}</span>
-                        </p>
-                        <p>
-                            heterozygous (Aa): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.Aa}</span>
-                        </p>
-                        <p>
-                            homozygous recessive (aa): <span className="purpleText">{generationDeathData[generationDeathIndex-1]?.aa}</span>
-                        </p>
-                    </div>
+                        <Data index = {generationDeathViewing} data = {generationDeathData[generationDeathViewing-1]} size = {size} />
+                        /* <p>
+                             className="purpleText">{generationDeathData[generationDeathIndex-1]?.AA}</span>
+                        </p> 
+                     
+                    </div> */}
                     </div>
                 </div>
                 <div className="visuals">
@@ -339,18 +312,19 @@ function App() {
                         }
                     } style={{marginBottom: "30px"}}/>
                     <div className="population">
-                        {generationData.length > 0 && generationData[generationIndex].AA >= 1 ? [...Array(generationData[generationIndex].AA)].map((e, i) => {
-                            return <img width="30" height="30" src={require("./assets/greenman.svg").default} alt="AA" className="AA"/>
-                        }) : null}
-                        {generationData.length > 0 && generationData[generationIndex].Aa >= 1 ? [...Array(generationData[generationIndex].Aa)].map((e, i) => {
-                            return <img width="30" height="30" src={require("./assets/brownman.svg").default} alt="Aa" className="Aa"/>
-                        }) : null}
-                        {generationData.length > 0 && generationData[generationIndex].aa >= 1 ? [...Array(generationData[generationIndex].aa)].map((e, i) => {
-                            return <img width="30" height="30" src={require("./assets/redman.svg").default} alt="aa" className="aa"/>
-                        }) : null}
+                        {generationData.length > 0 && generationData[generationIndex].AA >= 1 ? [...Array(generationData[generationIndex].AA)].map((e, i) => 
+                             <img width="30" height="30" src={require("./assets/greenman.svg").default} alt="AA" className="AA"/>
+                        ) : null}
+                        {generationData.length > 0 && generationData[generationIndex].Aa >= 1 ? [...Array(generationData[generationIndex].Aa)].map((e, i) => 
+                             <img width="30" height="30" src={require("./assets/brownman.svg").default} alt="Aa" className="Aa"/>
+                        ) : null}
+                        {generationData.length > 0 && generationData[generationIndex].aa >= 1 ? [...Array(generationData[generationIndex].aa)].map((e, i) => 
+                             <img width="30" height="30" src={require("./assets/redman.svg").default} alt="aa" className="aa"/>
+                        ) : null}
                     </div>
                 </div>
             </div>}
+           
         </div>
     );
 }
